@@ -8,5 +8,9 @@
     "express": "4.10.1",
     "morgan": "1.4.1",
     "ws": "0.4.32"
+  },
+  "devDependencies": {
+    "ngrok": "^0.1.99",
+    "twitter": "^1.2.5"
   }
 }

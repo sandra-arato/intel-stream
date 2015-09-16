@@ -1,12 +1,21 @@
 // modules
-var childProcess = require('child_process')
-  , express = require('express')
-  , http = require('http')
-  , morgan = require('morgan')
-  , ws = require('ws');
+var childProcess = require('child_process'),
+  express = require('express'),
+  http = require('http'),
+  morgan = require('morgan'),
+  ws = require('ws'),
+  ngrok = require('ngrok'),
+  Twitter = require('twitter');
 
 // configuration files
 var configServer = require('./lib/config/server');
+
+var twitter = new Twitter({
+  consumer_key: '',
+  consumer_secret: '',
+  access_token_key: '',
+  access_token_secret: ''
+});
 
 // app parameters
 var app = express();
@@ -19,7 +28,26 @@ require('./lib/routes').serveIndex(app, configServer.staticFolder);
 
 // HTTP server
 http.createServer(app).listen(app.get('port'), function () {
-  console.log('HTTP server listening on port ' + app.get('port'));
+  var port = app.get('port');
+
+  console.log('HTTP server listening on port ' + port);
+
+  ngrok.once('connect', function (url) {
+    console.log('Streaming live at ' + url);
+    app.publicUrl = url;
+
+    twitter.post('statuses/update', {
+      status: 'Watch the stream here: ' + url
+    },  function(error, tweet, response){
+      if(error) throw error;
+      console.log('Link tweeted.');  // Tweet body. 
+    });
+    
+  });
+
+  ngrok.connect(port, function (err, url) {});
+
+
 });
 
 /// Video streaming section
